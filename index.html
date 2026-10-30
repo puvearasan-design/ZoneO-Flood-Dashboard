@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zone O | Flood Resilience Dashboard</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#203348;
+}
+header {
+  background:#122b45;
+  color:white;
+  padding:23px 35px;
+}
+header h1 {margin:0;font-size:25px}
+header p {color:#bdcddd;margin:8px 0 0}
+nav {
+  background:#1c3d5b;
+  padding:12px 30px;
+  display:flex;
+  gap:25px;
+  flex-wrap:wrap;
+}
+nav a {
+  color:white;
+  text-decoration:none;
+  font-size:14px;
+}
+.container {padding:24px;max-width:1600px;margin:auto}
+.heading {margin-bottom:18px}
+.heading h2 {margin:0}
+.heading p {color:#718096}
+.cards {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:16px;
+}
+.card {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px #0000000c;
+}
+.card small {color:#718096}
+.card h2 {font-size:25px;margin:12px 0;color:#1676a9}
+.content {
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(250px,1fr);
+  gap:18px;
+  margin-top:20px;
+}
+.panel {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px #0000000c;
+}
+#map {
+  height:520px;
+  width:100%;
+  border-radius:8px;
+}
+.layers label {
+  display:block;
+  padding:10px 0;
+  border-bottom:1px solid #edf0f4;
+  font-size:14px;
+}
+.layers input {margin-right:8px}
+.status {
+  background:#fff5dc;
+  padding:12px;
+  border-radius:7px;
+  font-size:13px;
+  line-height:1.6;
+  color:#795a17;
+}
+.chartbox {margin-top:20px}
+footer {
+  margin-top:25px;
+  padding:22px;
+  background:#122b45;
+  color:#d8e4ef;
+  text-align:center;
+  font-size:12px;
+}
+@media(max-width:800px) {
+  .content {grid-template-columns:1fr}
+  header {padding:20px}
+  .container {padding:14px}
+  #map {height:420px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>ZONE O | FLOOD RESILIENCE</h1>
+  <p>Spatial Analysis of Development, Flood Risk and Environmental Sensitivity</p>
+  <p>Delhi, India | Research Dashboard | July 2023</p>
+</header>
+
+<nav>
+  <a href="#overview">Overview</a>
+  <a href="#mapping">Flood Mapping</a>
+  <a href="#susceptibility">Susceptibility</a>
+  <a href="#conflicts">Planning Conflicts</a>
+  <a href="#methodology">Methodology</a>
+</nav>
+
+<div class="container">
+
+<section id="overview">
+  <div class="heading">
+    <h2>Research Overview</h2>
+    <p>Between Development and Resilience: Planning Conflicts in Zone O, Delhi</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <small>Study Area</small>
+      <h2>Zone O</h2>
+      <small>Yamuna floodplain, Delhi</small>
+    </div>
+
+    <div class="card">
+      <small>Historical Event</small>
+      <h2>2023</h2>
+      <small>July flood analysis</small>
+    </div>
+
+    <div class="card">
+      <small>Analysis Grid</small>
+      <h2>30 m</h2>
+      <small>GIS analysis scale</small>
+    </div>
+
+    <div class="card">
+      <small>Susceptibility Classes</small>
+      <h2>5</h2>
+      <small>Very Low to Very High</small>
+    </div>
+  </div>
+</section>
+
+<section id="mapping" class="content">
+
+  <div class="panel">
+    <h3>Interactive Spatial Map</h3>
+    <p>Delhi | Zone O study area</p>
+    <div id="map"></div>
+  </div>
+
+  <div class="panel layers">
+    <h3>Map Layer Controls</h3>
+    <div id="layerStatus" class="status">
+      Base map is active. GEE analytical layers will be connected in the next stage.
+    </div>
+
+    <label><input type="checkbox" checked disabled> Base satellite / street map</label>
+    <label><input type="checkbox" disabled> Zone O boundary — awaiting GEE layer</label>
+    <label><input type="checkbox" disabled> Sentinel-1 pre-flood</label>
+    <label><input type="checkbox" disabled> Sentinel-1 flood period</label>
+    <label><input type="checkbox" disabled> Potential inundation</label>
+    <label><input type="checkbox" disabled> Flood susceptibility</label>
+    <label><input type="checkbox" disabled> Built-up conflict</label>
+    <label><input type="checkbox" disabled> Environmental conflict</label>
+    <label><input type="checkbox" disabled> MPD-2041 planned land use</label>
+  </div>
+
+</section>
+
+<section id="susceptibility" class="panel chartbox">
+  <h3>Flood Susceptibility Analysis</h3>
+  <p>Area statistics will appear after connection to the GEE analysis.</p>
+  <canvas id="susceptibilityChart" height="100"></canvas>
+</section>
+
+<section id="conflicts" class="panel chartbox">
+  <h3>Development and Environmental Conflict</h3>
+  <p>Built-up, ecological, road and planned land-use exposure statistics will be connected from GEE.</p>
+  <canvas id="conflictChart" height="100"></canvas>
+</section>
+
+<section id="methodology" class="panel chartbox">
+  <h3>Research Methodology</h3>
+  <ol>
+    <li>Study area delineation and spatial data acquisition.</li>
+    <li>Sentinel-1 SAR pre-event and flood-period comparison.</li>
+    <li>Historical flood inundation screening.</li>
+    <li>GIS-based flood susceptibility assessment.</li>
+    <li>Development and environmental conflict overlay.</li>
+    <li>Spatial prioritisation and planning recommendations.</li>
+  </ol>
+  <div class="status">
+    Preliminary analytical framework. Flood detection and susceptibility results require independent validation.
+    This dashboard does not represent calibrated return-period flood modelling.
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <strong>ZONE O FLOOD RESILIENCE DASHBOARD</strong>
+  <p>Research and spatial analysis | Delhi, India</p>
+  <p>Satellite data: Copernicus Sentinel-1, SRTM, Dynamic World, JRC Global Surface Water and CHIRPS.</p>
+</footer>
+
+<script>
+// Interactive base map.
+// This is a Delhi reference view, not the actual Zone O boundary.
+
+var map = L.map('map').setView([28.65,77.25],10);
+
+var street = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {attribution:'© OpenStreetMap contributors'}
+).addTo(map);
+
+var satellite = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {attribution:'Tiles © Esri'}
+);
+
+var baseMaps = {
+  "Street Map":street,
+  "Satellite Imagery":satellite
+};
+
+L.control.layers(baseMaps,null,{collapsed:false}).addTo(map);
+
+// Empty chart placeholders: actual GEE statistics will be connected later.
+new Chart(document.getElementById('susceptibilityChart'), {
+  type:'bar',
+  data:{
+    labels:['Very Low','Low','Moderate','High','Very High'],
+    datasets:[{
+      label:'Awaiting GEE area statistics',
+      data:[0,0,0,0,0],
+      backgroundColor:'#4c91bd'
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{y:{beginAtZero:true,title:{display:true,text:'Area (ha)'}}}
+  }
+});
+
+new Chart(document.getElementById('conflictChart'), {
+  type:'bar',
+  data:{
+    labels:['Built-up','Environmental','Road','Planned land use'],
+    datasets:[{
+      label:'Awaiting GEE conflict statistics',
+      data:[0,0,0,0],
+      backgroundColor:'#d39a45'
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{y:{beginAtZero:true,title:{display:true,text:'Area (ha)'}}}
+  }
+});
+</script>
+
+</body>
+</html>
